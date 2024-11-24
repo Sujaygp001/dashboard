@@ -1,6 +1,6 @@
 // src/App.js
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { RouterProvider as Router, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import Filters from './Filters';
 import Graph from './Graph';
