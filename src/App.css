@@ -1,0 +1,117 @@
+/* src/App.css */
+
+/* Load Graphs Button */
+.load-graphs-button {
+    padding: 10px 20px;
+    background-color: #0071E3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  /* Report Summary Button */
+  .report-summary-button {
+    padding: 10px 20px;
+    background-color: #0071E3;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  /* Hamburger Menu Button */
+  .hamburger-menu-button {
+    position: fixed;
+    top: 20px;
+    left: 0px;
+    background-color: #0071E3;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 20px;
+    cursor: pointer;
+    z-index: 1000;
+  }
+  
+  /* Side Panel */
+  .side-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 250px;
+    height: 100%;
+    background-color: #0071E3;
+    color: #fff;
+    transition: 0.3s;
+    padding: 20px;
+    z-index: 999;
+  }
+  
+  .side-panel-closed {
+    left: -350px;
+  }
+  
+  /* EHR Trigger Button */
+  .ehr-trigger-button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #fff;
+    color: #0071E3;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  /* Selected EHR Info */
+  .selected-ehr-info {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #ffffff;
+    color: #0071E3;
+    border-radius: 4px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Contact Us Button */
+  .contact-us-button {
+    display: block;
+    margin-top: 20px;
+    text-decoration: none;
+    background-color: #ffffff;
+    color: #0071E3;
+    padding: 10px;
+    border-radius: 4px;
+    text-align: center;
+    cursor: pointer;
+  }
+  
+  /* Clock Styles */
+  .clock-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin: 20px 0;
+  }
+  
+  .clock {
+    text-align: center;
+    padding: 15px;
+    border-radius: 8px;
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .ist-time {
+    background-color: #0071E3;
+  }
+  
+  .utc-time {
+    background-color: #FF9500;
+  }
+  

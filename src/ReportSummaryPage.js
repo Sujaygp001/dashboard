@@ -4,12 +4,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
+import './ReportSummaryPage.css';
 
 const ReportSummaryPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Preserve the options passed from the Dashboard
   const { selectedEHR, filters } = location.state || {
     selectedEHR: null,
     filters: {
@@ -22,17 +22,13 @@ const ReportSummaryPage = () => {
     },
   };
 
-  // State for managing dropdown visibility for export options
   const [exportDropdownVisible, setExportDropdownVisible] = useState({
     failed: false,
     successful: false,
   });
 
-  // Refs for export buttons
   const failedButtonRef = useRef(null);
   const successfulButtonRef = useRef(null);
-
-  // Refs for dropdowns
   const failedDropdownRef = useRef(null);
   const successfulDropdownRef = useRef(null);
 
@@ -161,7 +157,6 @@ const ReportSummaryPage = () => {
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD format
     const folderName = `${selectedEHR}-${today}`;
 
-    // Filter documents by the selected EHR
     const filteredFailedUploads = failedDocumentUploads.filter(
       (doc) => doc.ehr === selectedEHR
     );
@@ -170,7 +165,6 @@ const ReportSummaryPage = () => {
       (doc) => doc.ehr === selectedEHR
     );
 
-    // Add filtered failed uploads to the zip
     filteredFailedUploads.forEach((document) => {
       zip.folder(folderName).file(
         `${document.pdfLink}`,
@@ -178,7 +172,6 @@ const ReportSummaryPage = () => {
       );
     });
 
-    // Add filtered successful uploads to the zip
     filteredSuccessfulUploads.forEach((document) => {
       zip.folder(folderName).file(
         `${document.pdfLink}`,
@@ -197,71 +190,47 @@ const ReportSummaryPage = () => {
   };
 
   return (
-    <div
-      style={{
-        padding: '40px',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif',
-        backgroundColor: '#f5f5f7',
-        color: '#1d1d1f',
-        minHeight: '100vh',
-      }}
-    >
-      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>Report Summary Page</h1>
+    <div className="report-summary-page">
+      <h1 className="title">Report Summary Page</h1>
 
       {/* Back Button */}
-      <div style={{ marginBottom: '20px' }}>
+      <div className="back-button-container">
         <button
           onClick={() => navigate('/', { state: { filters, selectedEHR } })}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: '#0071E3',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: '600',
-          }}
+          className="back-button"
         >
           Back to Dashboard
         </button>
       </div>
 
       {/* Failed Document Upload Table */}
-      <h2 style={{ marginBottom: '10px' }}>Failed Document Uploads</h2>
-      <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            backgroundColor: '#fff',
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-          }}
-        >
+      <h2 className="section-title">Failed Document Uploads</h2>
+      <div className="table-container">
+        <table className="document-table">
           <thead>
-            <tr style={{ backgroundColor: '#f2f2f2' }}>
-              <th style={tableHeaderStyle}>EHR</th>
-              <th style={tableHeaderStyle}>Account</th>
-              <th style={tableHeaderStyle}>Date</th>
-              <th style={tableHeaderStyle}>Order Number</th>
-              <th style={tableHeaderStyle}>Document ID</th>
-              <th style={tableHeaderStyle}>Remarks</th>
-              <th style={tableHeaderStyle}>WAV Document Upload Status</th>
-              <th style={tableHeaderStyle}>Document/Order PDF Link</th>
+            <tr className="table-header">
+              <th>EHR</th>
+              <th>Account</th>
+              <th>Date</th>
+              <th>Order Number</th>
+              <th>Document ID</th>
+              <th>Remarks</th>
+              <th>WAV Document Upload Status</th>
+              <th>Document/Order PDF Link</th>
             </tr>
           </thead>
           <tbody>
             {failedDocumentUploads.map((row, index) => (
               <tr key={index}>
-                <td style={tableCellStyle}>{row.ehr}</td>
-                <td style={tableCellStyle}>{row.account}</td>
-                <td style={tableCellStyle}>{row.date}</td>
-                <td style={tableCellStyle}>{row.orderNumber}</td>
-                <td style={tableCellStyle}>{row.documentId}</td>
-                <td style={tableCellStyle}>{row.remarks}</td>
-                <td style={tableCellStyle}>{row.wavStatus}</td>
-                <td style={tableCellStyle}>
-                  <a href={`#${row.pdfLink}`} style={{ color: '#0071E3' }}>
+                <td>{row.ehr}</td>
+                <td>{row.account}</td>
+                <td>{row.date}</td>
+                <td>{row.orderNumber}</td>
+                <td>{row.documentId}</td>
+                <td>{row.remarks}</td>
+                <td>{row.wavStatus}</td>
+                <td>
+                  <a href={`#${row.pdfLink}`} className="pdf-link">
                     {row.pdfLink}
                   </a>
                 </td>
@@ -271,23 +240,23 @@ const ReportSummaryPage = () => {
         </table>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+      <div className="buttons-container">
         {/* Export Failed Document Table Button */}
-        <div style={{ position: 'relative', display: 'inline-block' }}>
+        <div className="export-button-container">
           <button
             ref={failedButtonRef}
             onClick={() => handleExportClick('failed')}
-            style={exportButtonStyle}
+            className="export-button"
           >
             Export Failed Table
           </button>
           {exportDropdownVisible.failed && (
-            <div ref={failedDropdownRef} style={translucentDropdownStyle}>
+            <div ref={failedDropdownRef} className="dropdown-menu">
               {['csv', 'txt', 'xlsx', 'json'].map((format) => (
                 <button
                   key={format}
                   onClick={() => handleExport('failed', format)}
-                  style={translucentDropdownItemStyle}
+                  className="dropdown-item"
                 >
                   {format.toUpperCase()}
                 </button>
@@ -297,55 +266,36 @@ const ReportSummaryPage = () => {
         </div>
 
         {/* Bulk Download PDF Button */}
-        <button
-          onClick={handleBulkDownloadPDFs}
-          style={{
-            padding: '12px 24px',
-            backgroundColor: '#0071E3',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: '600',
-          }}
-        >
+        <button onClick={handleBulkDownloadPDFs} className="bulk-download-button">
           Bulk Download
         </button>
       </div>
 
       {/* Successful Document Upload Table */}
-      <h2 style={{ marginBottom: '10px' }}>Successful Document Uploads</h2>
-      <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
-        <table
-          style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            backgroundColor: '#fff',
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-          }}
-        >
+      <h2 className="section-title">Successful Document Uploads</h2>
+      <div className="table-container">
+        <table className="document-table">
           <thead>
-            <tr style={{ backgroundColor: '#f2f2f2' }}>
-              <th style={tableHeaderStyle}>EHR</th>
-              <th style={tableHeaderStyle}>Account</th>
-              <th style={tableHeaderStyle}>Date</th>
-              <th style={tableHeaderStyle}>Order Number</th>
-              <th style={tableHeaderStyle}>Document ID</th>
-              <th style={tableHeaderStyle}>Remarks</th>
-              <th style={tableHeaderStyle}>WAV Document Upload Status</th>
+            <tr className="table-header">
+              <th>EHR</th>
+              <th>Account</th>
+              <th>Date</th>
+              <th>Order Number</th>
+              <th>Document ID</th>
+              <th>Remarks</th>
+              <th>WAV Document Upload Status</th>
             </tr>
           </thead>
           <tbody>
             {successfulDocumentUploads.map((row, index) => (
               <tr key={index}>
-                <td style={tableCellStyle}>{row.ehr}</td>
-                <td style={tableCellStyle}>{row.account}</td>
-                <td style={tableCellStyle}>{row.date}</td>
-                <td style={tableCellStyle}>{row.orderNumber}</td>
-                <td style={tableCellStyle}>{row.documentId}</td>
-                <td style={tableCellStyle}>{row.remarks}</td>
-                <td style={tableCellStyle}>{row.wavStatus}</td>
+                <td>{row.ehr}</td>
+                <td>{row.account}</td>
+                <td>{row.date}</td>
+                <td>{row.orderNumber}</td>
+                <td>{row.documentId}</td>
+                <td>{row.remarks}</td>
+                <td>{row.wavStatus}</td>
               </tr>
             ))}
           </tbody>
@@ -353,21 +303,21 @@ const ReportSummaryPage = () => {
       </div>
 
       {/* Export Successful Document Table Button */}
-      <div style={{ position: 'relative', display: 'inline-block', marginBottom: '30px' }}>
+      <div className="export-button-container">
         <button
           ref={successfulButtonRef}
           onClick={() => handleExportClick('successful')}
-          style={exportButtonStyle}
+          className="export-button"
         >
           Export Successful Table
         </button>
         {exportDropdownVisible.successful && (
-          <div ref={successfulDropdownRef} style={translucentDropdownStyle}>
+          <div ref={successfulDropdownRef} className="dropdown-menu">
             {['csv', 'txt', 'xlsx', 'json'].map((format) => (
               <button
                 key={format}
                 onClick={() => handleExport('successful', format)}
-                style={translucentDropdownItemStyle}
+                className="dropdown-item"
               >
                 {format.toUpperCase()}
               </button>
@@ -377,61 +327,6 @@ const ReportSummaryPage = () => {
       </div>
     </div>
   );
-};
-
-// Styles for the table header and cells
-const tableHeaderStyle = {
-  padding: '10px',
-  textAlign: 'left',
-  borderBottom: '2px solid #ddd',
-  backgroundColor: '#e6e6e6',
-  fontWeight: 'bold',
-};
-
-const tableCellStyle = {
-  padding: '10px',
-  borderBottom: '1px solid #ddd',
-};
-
-// Styles for export button and translucent dropdown
-const exportButtonStyle = {
-  padding: '12px 24px',
-  backgroundColor: '#0071E3',
-  color: '#fff',
-  border: 'none',
-  borderRadius: '8px',
-  cursor: 'pointer',
-  fontSize: '16px',
-  fontWeight: '600',
-  transition: 'background-color 0.3s ease',
-};
-
-const translucentDropdownStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  backgroundColor: 'rgba(249, 249, 249, 0.8)', // Translucent background
-  boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.2)',
-  position: 'absolute',
-  top: '100%',
-  left: '0',
-  borderRadius: '12px',
-  overflow: 'hidden',
-  transform: 'translateY(10px)',
-  zIndex: '100',
-  marginTop: '8px',
-  width: '150px',
-};
-
-const translucentDropdownItemStyle = {
-  padding: '8px 16px',
-  borderBottom: '1px solid #ddd',
-  cursor: 'pointer',
-  backgroundColor: 'rgba(249, 249, 249, 0.8)', // Match dropdown background
-  color: '#0071E3',
-  textAlign: 'left',
-  transition: 'background-color 0.3s ease, color 0.3s ease',
-  fontSize: '14px',
-  fontWeight: '500',
 };
 
 export default ReportSummaryPage;

@@ -5,6 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import Filters from './Filters';
 import Graph from './Graph';
 import ReportSummaryPage from './ReportSummaryPage'; // Import the new ReportSummaryPage component
+import SidePanel from './SidePanel'; // Import the new SidePanel component
+//import Clock from './Clocks'; // Import the new Clock component
+import Header from './Header'; // Import the new Header component
 import {
   Chart as ChartJS,
   ArcElement,
@@ -32,8 +35,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [showGraphs, setShowGraphs] = useState(false);
   const [graphData, setGraphData] = useState(null);
-  const [istTime, setIstTime] = useState(new Date());
-  const [utcTime, setUtcTime] = useState(new Date());
   const [sidePanelOpen, setSidePanelOpen] = useState(false);
   const [selectedEhrInfo, setSelectedEhrInfo] = useState(null);
 
@@ -87,25 +88,6 @@ const Dashboard = () => {
       { value: 'monthly', label: `Monthly (${ranges.monthly.start} - ${ranges.monthly.end})` },
       { value: 'custom', label: 'Custom Range' },
     ]);
-
-    const timer = setInterval(() => {
-      const now = new Date();
-      setUtcTime(new Date(now.getTime() + 5.5 * 60 * 60 * 1000)); // IST offset
-      setIstTime(new Date(now.getTime()));
-    }, 1000);
-
-    const handleClickOutside = (event) => {
-      if (sidePanelRef.current && !sidePanelRef.current.contains(event.target)) {
-        setSidePanelOpen(false);
-        setSelectedEhrInfo(null);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      clearInterval(timer);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
   }, []);
 
   const fetchAgencyOptions = async (ehrName) => {
@@ -143,13 +125,23 @@ const Dashboard = () => {
 
     let updatedGraphData = null;
 
+    // Check if 'Select All' is selected
+    const selectAllSelected = agency.some((a) => a.value === 'select-all');
+
+    let selectedAgencies = [];
+    if (selectAllSelected) {
+      selectedAgencies = agencyOptions.filter((a) => a.value !== 'select-all').map((a) => a.label);
+    } else {
+      selectedAgencies = agency.map((a) => a.label);
+    }
+
     if (dateRange.value === 'daily') {
       updatedGraphData = {
-        labels: ['Today'],
+        labels: selectAllSelected ? ['All Agencies'] : selectedAgencies, // Show 'All Agencies' if select all is chosen
         datasets: [
           {
             label: 'Total Orders Needed to Be Uploaded',
-            data: [30],
+            data: selectAllSelected ? [30 * selectedAgencies.length] : new Array(selectedAgencies.length).fill(30), // Cumulative value if select all is chosen
             backgroundColor: '#FF9500',
             borderColor: '#FF9500',
             fill: false,
@@ -157,7 +149,7 @@ const Dashboard = () => {
           },
           {
             label: 'Orders Actually Uploaded',
-            data: [25],
+            data: selectAllSelected ? [25 * selectedAgencies.length] : new Array(selectedAgencies.length).fill(25),
             backgroundColor: '#34C759',
             borderColor: '#34C759',
             fill: false,
@@ -167,11 +159,11 @@ const Dashboard = () => {
       };
     } else if (dateRange.value === 'weekly') {
       updatedGraphData = {
-        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+        labels: selectAllSelected ? ['All Agencies'] : selectedAgencies, // Show 'All Agencies' if select all is chosen
         datasets: [
           {
             label: 'Total Orders Needed to Be Uploaded',
-            data: [50, 60, 55, 70, 65, 80, 75],
+            data: selectAllSelected ? [50 * selectedAgencies.length] : new Array(selectedAgencies.length).fill(50), // Cumulative value if select all is chosen
             backgroundColor: '#FF9500',
             borderColor: '#FF9500',
             fill: false,
@@ -179,7 +171,7 @@ const Dashboard = () => {
           },
           {
             label: 'Orders Actually Uploaded',
-            data: [40, 50, 45, 65, 60, 70, 68],
+            data: selectAllSelected ? [45 * selectedAgencies.length] : new Array(selectedAgencies.length).fill(45),
             backgroundColor: '#34C759',
             borderColor: '#34C759',
             fill: false,
@@ -189,11 +181,11 @@ const Dashboard = () => {
       };
     } else if (dateRange.value === 'monthly') {
       updatedGraphData = {
-        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        labels: selectAllSelected ? ['All Agencies'] : selectedAgencies, // Show 'All Agencies' if select all is chosen
         datasets: [
           {
             label: 'Total Orders Needed to Be Uploaded',
-            data: [200, 210, 190, 220],
+            data: selectAllSelected ? [200 * selectedAgencies.length] : new Array(selectedAgencies.length).fill(200), // Cumulative value if select all is chosen
             backgroundColor: '#FF9500',
             borderColor: '#FF9500',
             fill: false,
@@ -201,7 +193,7 @@ const Dashboard = () => {
           },
           {
             label: 'Orders Actually Uploaded',
-            data: [180, 190, 170, 200],
+            data: selectAllSelected ? [180 * selectedAgencies.length] : new Array(selectedAgencies.length).fill(180),
             backgroundColor: '#34C759',
             borderColor: '#34C759',
             fill: false,
@@ -215,185 +207,25 @@ const Dashboard = () => {
     setShowGraphs(true);
   };
 
-  const handleEhrClick = (ehrOption) => {
-    if (selectedEhrInfo && selectedEhrInfo.value === ehrOption.value) {
-      setSelectedEhrInfo(null);
-    } else {
-      setSelectedEhrInfo({
-        value: ehrOption.value,
-        label: ehrOption.label,
-        startTime: '10:00 AM',
-        endTime: '10:30 AM',
-        totalTime: '30 mins',
-      });
-    }
-  };
-
   const handleReportSummaryClick = () => {
     navigate('/report-summary');
   };
 
   return (
-    <div
-      style={{
-        padding: '20px',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif',
-        backgroundColor: '#f5f5f7',
-        color: '#1d1d1f',
-        minHeight: '100vh',
-      }}
-    >
-      {/* Hamburger Menu */}
-      <div style={{ position: 'relative' }}>
-        {!sidePanelOpen && (
-          <button
-            onClick={() => setSidePanelOpen(true)}
-            style={{
-              position: 'fixed',
-              top: '20px',
-              left: '0px',
-              backgroundColor: '#0071E3',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              padding: '20px',
-              cursor: 'pointer',
-              zIndex: 1000,
-            }}
-          >
-            ☰
-          </button>
-        )}
-        <div
-          ref={sidePanelRef}
-          style={{
-            position: 'fixed',
-            top: '0',
-            left: sidePanelOpen ? '0' : '-350px',
-            width: '250px',
-            height: '100%',
-            backgroundColor: '#0071E3',
-            color: '#fff',
-            transition: '0.3s',
-            padding: '20px',
-            zIndex: 999,
-          }}
-        >
-          <h2>EHR Triggers</h2>
-          {ehrOptions.map((ehrOption) => (
-            <div key={ehrOption.value}>
-              <button
-                onClick={() => handleEhrClick(ehrOption)}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: '10px',
-                  margin: '10px 0',
-                  backgroundColor: '#fff',
-                  color: '#0071E3',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                {ehrOption.label}
-              </button>
-              {selectedEhrInfo && selectedEhrInfo.value === ehrOption.value && (
-                <div
-                  style={{
-                    marginTop: '10px',
-                    padding: '10px',
-                    backgroundColor: '#ffffff',
-                    color: '#0071E3',
-                    borderRadius: '4px',
-                    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-                  }}
-                >
-                  <h4>About {ehrOption.label}</h4>
-                  <p>{ehrOption.label} is an electronic health record system used for managing patient records and workflow processes.</p>
-                  <p><strong>Bot Start Time:</strong> {selectedEhrInfo.startTime}</p>
-                  <p><strong>Bot End Time:</strong> {selectedEhrInfo.endTime}</p>
-                  <p><strong>Total Execution Time:</strong> {selectedEhrInfo.totalTime}</p>
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Contact Us Button */}
-          <a
-            href="mailto:support@ehr.com"
-            style={{
-              display: 'block',
-              marginTop: '20px',
-              textDecoration: 'none',
-              backgroundColor: '#ffffff',
-              color: '#0071E3',
-              padding: '10px',
-              borderRadius: '4px',
-              textAlign: 'center',
-              cursor: 'pointer',
-            }}
-          >
-            Contact Us
-          </a>
-        </div>
-      </div>
-
-      {/* Title */}
-      <h1
-        style={{
-          textAlign: 'center',
-          fontSize: '2.5rem',
-          fontWeight: 'bold',
-          margin: '20px 0',
-          color: '#1d1d1f',
-        }}
-      >
-        Bot Success Rate Dashboard
-      </h1>
-
-      {/* Clocks */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '40px',
-          margin: '20px 0',
-        }}
-      >
-        <div
-          style={{
-            textAlign: 'center',
-            backgroundColor: '#0071E3',
-            color: '#fff',
-            padding: '15px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          }}
-        >
-          <h3 style={{ margin: '0', fontSize: '1.5rem' }}>IST Time</h3>
-          <p style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '5px 0' }}>
-            {istTime.toLocaleTimeString('en-US', { hour12: true })}
-          </p>
-        </div>
-        <div
-          style={{
-            textAlign: 'center',
-            backgroundColor: '#FF9500',
-            color: '#fff',
-            padding: '15px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-          }}
-        >
-          <h3 style={{ margin: '0', fontSize: '1.5rem' }}>UTC Time</h3>
-          <p style={{ fontSize: '1.25rem', fontWeight: 'bold', margin: '5px 0' }}>
-            {utcTime.toLocaleTimeString('en-US', { hour12: true })}
-          </p>
-        </div>
-      </div>
-
+    <div>
+      <Header
+        sidePanelOpen={sidePanelOpen}
+        setSidePanelOpen={setSidePanelOpen}
+        sidePanelRef={sidePanelRef}
+      />
+      <SidePanel
+        ehrOptions={ehrOptions}
+        selectedEhrInfo={selectedEhrInfo}
+        setSelectedEhrInfo={setSelectedEhrInfo}
+        sidePanelOpen={sidePanelOpen}
+        setSidePanelOpen={setSidePanelOpen}
+        sidePanelRef={sidePanelRef}
+      />
       {/* Dashboard Content */}
       <Filters
         graphTypeOptions={graphTypeOptions}
@@ -416,40 +248,22 @@ const Dashboard = () => {
         loading={loading}
         fetchAgencyOptions={fetchAgencyOptions}
       />
-
       <div style={{ textAlign: 'center', marginTop: '20px' }}>
         <button
           onClick={handleLoadGraphs}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#0071E3',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '1rem',
-            cursor: 'pointer',
-          }}
+          className="load-graphs-button"
           disabled={loading}
         >
           {loading ? 'Loading...' : 'Load Graphs'}
         </button>
       </div>
-
       {showGraphs && (
         <>
           <Graph graphType={graphType} data={graphData} />
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <button
               onClick={handleReportSummaryClick}
-              style={{
-                padding: '10px 20px',
-                backgroundColor: '#0071E3',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                cursor: 'pointer',
-              }}
+              className="report-summary-button"
             >
               Report Summary
             </button>
@@ -463,12 +277,12 @@ const Dashboard = () => {
 // Main App Component
 const App = () => {
   return (
-        <Router>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/report-summary" element={<ReportSummaryPage />} />
-        </Routes>
-      </Router>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/report-summary" element={<ReportSummaryPage />} />
+      </Routes>
+    </Router>
   );
 };
 
